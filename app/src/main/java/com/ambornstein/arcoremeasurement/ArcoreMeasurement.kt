@@ -1,10 +1,11 @@
-package com.shibuiwilliam.arcoremeasurement
+package com.ambornstein.arcoremeasurement
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import com.shibuiwilliam.arcoremeasurement.R
 
 class ArcoreMeasurement : AppCompatActivity() {
     private val TAG = "ArcoreMeasurement"

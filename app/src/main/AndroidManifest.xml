@@ -17,9 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".Measurement" />
+        <activity android:name="com.ambornstein.arcoremeasurement.Measurement" />
         <activity
-            android:name=".ArcoreMeasurement"
+            android:name="com.ambornstein.arcoremeasurement.ArcoreMeasurement"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="locked"

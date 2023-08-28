@@ -1,4 +1,4 @@
-package com.shibuiwilliam.arcoremeasurement
+package com.ambornstein.arcoremeasurement
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -18,15 +18,16 @@ import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Scene
-import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
-import com.shibuiwilliam.arcoremeasurement.Util.*
-import com.shibuiwilliam.arcoremeasurement.Util.Companion.calculateDistance
-import com.shibuiwilliam.arcoremeasurement.Util.Companion.changeUnit
-import com.shibuiwilliam.arcoremeasurement.Util.Companion.makeDistanceTextWithCM
+import com.ambornstein.arcoremeasurement.Util.*
+import com.ambornstein.arcoremeasurement.Util.Companion.calculateDistance
+import com.ambornstein.arcoremeasurement.Util.Companion.changeUnit
+import com.ambornstein.arcoremeasurement.Util.Companion.makeDistanceTextWithCM
+import com.shibuiwilliam.arcoremeasurement.R
+import java.lang.IndexOutOfBoundsException
 import java.util.Objects
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -36,8 +37,6 @@ import com.google.ar.sceneform.rendering.Color as arColor
 class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     private val MIN_OPENGL_VERSION = 3.0
     private val TAG: String = Measurement::class.java.getSimpleName()
-
-
 
     private var distanceModeTextView: TextView? = null
     private lateinit var pointTextView: TextView
@@ -75,7 +74,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     private val midAnchorNodes: MutableMap<String, AnchorNode> = mutableMapOf()
     private val fromGroundNodes = ArrayList<List<Node>>()
 
-    private val multipleDistances = Array(Constants.maxNumMultiplePoints
+    private val multipleDistances = Array(
+        Constants.maxNumMultiplePoints
     ) { Array<TextView?>(Constants.maxNumMultiplePoints) { null } }
     private lateinit var initCM: String
 
@@ -133,32 +133,32 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun initDistanceTable(){
-        for (i in 0 until Constants.maxNumMultiplePoints+1){
+        for (i in 0 until Constants.maxNumMultiplePoints +1){
             val tableRow = TableRow(this)
             multipleDistanceTableLayout.addView(tableRow,
                 multipleDistanceTableLayout.width,
                 Constants.multipleDistanceTableHeight / (Constants.maxNumMultiplePoints + 1))
-            for (j in 0 until Constants.maxNumMultiplePoints+1){
+            for (j in 0 until Constants.maxNumMultiplePoints +1){
                 val textView = TextView(this)
                 textView.setTextColor(Color.WHITE)
                 if (i==0){
                     if (j==0){
-                        textView.setText("cm")
+                        textView.text = "cm"
                     }
                     else{
-                        textView.setText((j-1).toString())
+                        textView.text = (j-1).toString()
                     }
                 }
                 else{
                     if (j==0){
-                        textView.setText((i-1).toString())
+                        textView.text = (i-1).toString()
                     }
                     else if(i==j){
-                        textView.setText("-")
+                        textView.text = "-"
                         multipleDistances[i-1][j-1] = textView
                     }
                     else{
-                        textView.setText(initCM)
+                        textView.text = initCM
                         multipleDistances[i-1][j-1] = textView
                     }
                 }
@@ -177,7 +177,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         arrow1UpView.setImageResource(R.drawable.arrow_1up)
         arrow1UpLinearLayout.addView(arrow1UpView,
             Constants.arrowViewSize,
-            Constants.arrowViewSize)
+            Constants.arrowViewSize
+        )
 
         arrow1DownLinearLayout = LinearLayout(this)
         arrow1DownLinearLayout.orientation = LinearLayout.VERTICAL
@@ -186,7 +187,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         arrow1DownView.setImageResource(R.drawable.arrow_1down)
         arrow1DownLinearLayout.addView(arrow1DownView,
             Constants.arrowViewSize,
-            Constants.arrowViewSize)
+            Constants.arrowViewSize
+        )
 
         arrow10UpLinearLayout = LinearLayout(this)
         arrow10UpLinearLayout.orientation = LinearLayout.VERTICAL
@@ -195,7 +197,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         arrow10UpView.setImageResource(R.drawable.arrow_10up)
         arrow10UpLinearLayout.addView(arrow10UpView,
             Constants.arrowViewSize,
-            Constants.arrowViewSize)
+            Constants.arrowViewSize
+        )
 
         arrow10DownLinearLayout = LinearLayout(this)
         arrow10DownLinearLayout.orientation = LinearLayout.VERTICAL
@@ -204,7 +207,8 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         arrow10DownView.setImageResource(R.drawable.arrow_10down)
         arrow10DownLinearLayout.addView(arrow10DownView,
             Constants.arrowViewSize,
-            Constants.arrowViewSize)
+            Constants.arrowViewSize
+        )
     }
 
     private fun initRenderable() {
@@ -446,10 +450,10 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         arFragment!!.arSceneView.scene.addChild(anchorNode)
     }
 
-    private fun placeSelectionBox(hitResult1: HitResult, hitResult2: HitResult) {
+    private fun placeSelectionBox(hitResult1: HitResult, hitResult2: HitResult, plane: Plane): SelectionBox{
         val corner1 = CornerAnchorNode(hitResult1.createAnchor())
         val corner2 = CornerAnchorNode(hitResult2.createAnchor())
-        selectionBox = SelectionBox(corner1,corner2, cubeRenderable!!)
+        return SelectionBox(corner1,corner2, cubeRenderable!!, plane)
     }
 
     private fun tapDistanceFromGround(hitResult: HitResult){
@@ -615,8 +619,11 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         }
         else if (taps.size == 1){
             taps.add(hitResult)
-            placedAnchors.clear()
-            placeSelectionBox(taps[0],taps[1])
+            placedAnchors[0].detach()
+
+            if (taps[0].trackable is Plane && taps[1].trackable.equals(taps[0].trackable)) {
+                selectionBox = placeSelectionBox(taps[0],taps[1], taps[0].trackable as Plane)
+            }
 
             val quaternion = floatArrayOf(0.0f,0.0f,0.0f,0.0f)
             val pose = Pose(selectionBox!!.centerPoint(), quaternion)
@@ -624,6 +631,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
         }
         else {
             clearAllAnchors()
+            placeAnchor(hitResult, cubeRenderable!!)
             taps.add(hitResult)
         }
     }
@@ -710,7 +718,7 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun measureSelectionArea(length: Float, width: Float) {
-        val areaTextCM = Util.makeAreaTextWithCM(length, width)
+        val areaTextCM = Util.makeAreaTextWithFT(length, width)
         val textView = (distanceCardViewRenderable!!.view as LinearLayout)
             .findViewById<TextView>(R.id.distanceCard)
         textView.text = areaTextCM
@@ -755,6 +763,17 @@ class Measurement : AppCompatActivity(), Scene.OnUpdateListener {
 }
 class Util {
     companion object {
+
+        fun floatToVec3(floatArray: FloatArray): Vector3? {
+            if(floatArray.size == 3) {
+                return Vector3(floatArray[0], floatArray[1], floatArray[2])
+            }
+            return null
+        }
+
+        fun vec3ToFloat(vec: Vector3): FloatArray {
+            return floatArrayOf(vec.x,vec.y,vec.z)
+        }
 
         fun makeDistanceTextWithCM(distanceMeter: Float): String {
             val distanceCM = changeUnit(distanceMeter, "cm")

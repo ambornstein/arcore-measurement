@@ -1,12 +1,14 @@
-package com.shibuiwilliam.arcoremeasurement
+package com.ambornstein.arcoremeasurement
 
+import android.view.MotionEvent
 import com.google.ar.core.Anchor
 import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.FrameTime
+import com.ambornstein.arcoremeasurement.Measurement.Companion.arFragment
+import com.google.ar.sceneform.HitTestResult
+import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Scene
-import com.shibuiwilliam.arcoremeasurement.Measurement.Companion.arFragment
 
-class CornerAnchorNode(anchor: Anchor) : AnchorNode(anchor) {
+class CornerAnchorNode(anchor: Anchor) : AnchorNode(anchor) , Node.OnTouchListener{
     private var vertNeighbor: CornerAnchorNode? = null
     private var horizNeighbor: CornerAnchorNode? = null
 
@@ -38,5 +40,13 @@ class CornerAnchorNode(anchor: Anchor) : AnchorNode(anchor) {
         horizNeighbor?.horizNeighbor = null
         horizNeighbor = null
     }
-
+    override fun onTouch(p0: HitTestResult?, p1: MotionEvent?): Boolean {
+        if (p1 != null) {
+            if (p1.action == MotionEvent.ACTION_UP) {
+                align()
+                return true
+            }
+        }
+        return false
+    }
 }
